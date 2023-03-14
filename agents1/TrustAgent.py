@@ -76,11 +76,32 @@ class TrustAgent(BaselineAgent):
         self._navigator = Navigator(agent_id=self.agent_id, action_set=self.action_set,
                                     algorithm=Navigator.A_STAR_ALGORITHM)
 
-    def get_trust(self):
-        return self._trustBeliefs
+    def get_trust(self, folder):
+        trustBeliefs = {}
+        trustfile_header = []
+        default = 0.5
+        with open(folder + '/beliefs/currentTrustBelief.csv') as csvfile:
+            reader = csv.reader(csvfile, delimiter=';', quotechar="'")
+            for row in reader:
+                if trustfile_header == []:
+                    trustfile_header = row
+                    continue
+                # Retrieve trust values
+                if row and row[0] == self._humanName:
+                    name = row[0]
+                    competence = float(row[1])
+                    willingness = float(row[2])
+                    trustBeliefs[name] = {'competence': competence, 'willingness': willingness}
+                if row and row[0] != self._humanName:
+                    competence = default
+                    willingness = default
+                    trustBeliefs[self._humanName] = {'competence': competence, 'willingness': willingness}
 
-    def update_trust(self, competence, willingness):
-        trustBeliefs = self.get_trust()
+        return trustBeliefs
+
+    def update_trust(self, competence, willingness, folder):
+        trustBeliefs = self.get_trust(folder)
+        print("Current trustbeliefs = ", trustBeliefs)
         # Update competence
         if competence != 0:
             trustBeliefs[self._humanName]['competence'] += competence
@@ -91,23 +112,20 @@ class TrustAgent(BaselineAgent):
         # Update willingness
         if willingness != 0:
             trustBeliefs[self._humanName]['willingness'] += willingness
+            trustBeliefs[self._humanName]['willingness'] = round(trustBeliefs[self._humanName]['willingness'], 1)
             # Restrict the competence belief to a range of -1 to 1
             trustBeliefs[self._humanName]['willingness'] = np.clip(trustBeliefs[self._humanName]['willingness'], -1,
                                                                    1)
 
+
         self._trustBeliefs = trustBeliefs
         # # Save current trust belief values again
-        with open(self._folder + '/beliefs/currentTrustBelief.csv', mode='w') as csv_file:
+        with open(folder + '/beliefs/currentTrustBelief.csv', mode='w') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow(["Samantha", "JEJOE", "JOEE"])
-
-        # reading the csv file
-        # df = pd.read_csv(self._folder + '/beliefs/currentTrustBelief.csv')
-        #
-        # # updating the column value/data
-        # df.loc[self._humanName, 'competence'] = trustBeliefs[self._humanName]['competence']
-        # df.loc[self._humanName, 'willingness'] = trustBeliefs[self._humanName]['willingness']
-        # df.to_csv(self._folder + '/beliefs/currentTrustBelief.csv', index=False)
+            csv_writer.writerow(['name', 'competence', 'willingness'])
+            csv_writer.writerow([self._humanName, trustBeliefs[self._humanName]['competence'],
+                                 trustBeliefs[self._humanName]['willingness']])
+            csv_file.close()
         print("UPDATED TRUST BELIEFS",  trustBeliefs)
 
     def decide_on_actions(self, state):
@@ -126,7 +144,7 @@ class TrustAgent(BaselineAgent):
         # Initialize and update trust beliefs for team members
         trustBeliefs = self._loadBelief(self._teamMembers, self._folder)
         self._trustBeliefs = trustBeliefs
-        self._trustBelief(self._teamMembers, trustBeliefs, self._folder, self._receivedMessages)
+        # self._trustBelief(self._teamMembers, trustBeliefs, self._folder, self._receivedMessages)
 
         # Check whether human is close in distance
         if state[{'is_human_agent': True}]:
@@ -600,8 +618,8 @@ class TrustAgent(BaselineAgent):
                     self._sendMessage(self._goalVic + ' not present in ' + str(self._door[
                                                                                    'room_name']) + ' because I searched the whole area without finding ' + self._goalVic + '.',
                                       'RescueBot')
-                    # TRUST
-                    self.update_trust(0, -0.2)
+                    # TRUST UPDATE
+                    self.update_trust(0, -0.2, self._folder)
 
                     # Remove the victim location from memory
                     self._foundVictimLocs.pop(self._goalVic, None)
