@@ -70,32 +70,40 @@ class TrustAgent(BaselineAgent):
         self._moving = False
         self._trustBeliefs = None
 
+        trustBeliefs = self._loadBelief(self._teamMembers, self._folder)
+        self._trustBeliefs = trustBeliefs
+        with open(self._folder + '/beliefs/currentTrustBelief.csv', mode='w') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            csv_writer.writerow(['name', 'competence', 'willingness'])
+            csv_writer.writerow([self._humanName, trustBeliefs[self._humanName]['competence'],
+                                 trustBeliefs[self._humanName]['willingness']])
+
     def initialize(self):
         # Initialization of the state tracker and navigation algorithm
         self._state_tracker = StateTracker(agent_id=self.agent_id)
         self._navigator = Navigator(agent_id=self.agent_id, action_set=self.action_set,
                                     algorithm=Navigator.A_STAR_ALGORITHM)
 
+
     def get_trust(self, folder):
         trustBeliefs = {}
         trustfile_header = []
         default = 0.5
+        # read current trust value
         with open(folder + '/beliefs/currentTrustBelief.csv') as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar="'")
             for row in reader:
+                # Skip header
                 if trustfile_header == []:
                     trustfile_header = row
                     continue
                 # Retrieve trust values
                 if row and row[0] == self._humanName:
+                    # If person is in current trust belief get these values
                     name = row[0]
                     competence = float(row[1])
                     willingness = float(row[2])
                     trustBeliefs[name] = {'competence': competence, 'willingness': willingness}
-                if row and row[0] != self._humanName:
-                    competence = default
-                    willingness = default
-                    trustBeliefs[self._humanName] = {'competence': competence, 'willingness': willingness}
 
         return trustBeliefs
 
