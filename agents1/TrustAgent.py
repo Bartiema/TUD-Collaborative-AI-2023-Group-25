@@ -36,12 +36,14 @@ class Phase(enum.Enum):
 
 class Punishment():
     TIMEOUT = 900
+    REPLY_TIMEOUT = 100
 
     SUCCESFULL_RESCUE = 0.2
     HELP_REMOVE = 0.1
     FAST_CARRY = 0.2
     FAST_REPLY = 0.1
     SLOW_REPLY = -0.2
+    SLOW_WALK = -0.2
     # trigger below if distance close but human no wants help
     SLOW_SOLO_RESCUE_COMPETENCE = -0.1
     SLOW_SOLO_RESCUE_WILLINGNESS = 0.1
@@ -95,6 +97,7 @@ class TrustAgent(BaselineAgent):
         self._trustBeliefs = None
         self.remove_together = False
         self.carryingTogetherFlipFlop = False
+        self.wait_on_human = False
         self._idle_timer = 0
 
         trustBeliefs = self._loadBelief(self._teamMembers, self._folder)
@@ -427,6 +430,17 @@ class TrustAgent(BaselineAgent):
                     if 'class_inheritance' in info and 'ObstacleObject' in info['class_inheritance'] and 'rock' in info[
                         'obj_id']:
                         objects.append(info)
+
+                        if self._waiting:
+                            self._idle_timer += 1
+                        else:
+                            self._idle_timer = 0
+
+                        if self._waiting and self.wait_on_human:
+                            if self._idle_timer > Punishment.REPLY_TIMEOUT:
+                                self.update_trust(0, Punishment.SLOW_REPLY, self._folder)
+                            self._idle_timer = 0
+
                         # Communicate which obstacle is blocking the entrance
                         if self._answered == False and not self._remove and not self._waiting:
                             self._sendMessage('Found rock blocking ' + str(self._door['room_name']) + '. Please decide whether to "Remove" or "Continue" searching. \n \n \
@@ -468,6 +482,17 @@ class TrustAgent(BaselineAgent):
                     if 'class_inheritance' in info and 'ObstacleObject' in info['class_inheritance'] and 'tree' in info[
                         'obj_id']:
                         objects.append(info)
+
+                        if self._waiting:
+                            self._idle_timer += 1
+                        else:
+                            self._idle_timer = 0
+
+                        if self._waiting and self.wait_on_human:
+                            if self._idle_timer > Punishment.REPLY_TIMEOUT:
+                                self.update_trust(0, Punishment.SLOW_REPLY, self._folder)
+                            self._idle_timer = 0
+
                         # Communicate which obstacle is blocking the entrance
                         if self._answered == False and not self._remove and not self._waiting:
                             self._sendMessage('Found tree blocking  ' + str(self._door['room_name']) + '. Please decide whether to "Remove" or "Continue" searching. \n \n \
@@ -505,6 +530,16 @@ class TrustAgent(BaselineAgent):
                     if 'class_inheritance' in info and 'ObstacleObject' in info['class_inheritance'] and 'stone' in \
                             info['obj_id']:
                         objects.append(info)
+                        if self._waiting:
+                            self._idle_timer += 1
+                        else:
+                            self._idle_timer = 0
+
+                        if self._waiting and self.wait_on_human:
+                            if self._idle_timer > Punishment.REPLY_TIMEOUT:
+                                self.update_trust(0, Punishment.SLOW_REPLY, self._folder)
+                            self._idle_timer = 0
+
                         # Communicate which obstacle is blocking the entrance
                         if self._answered == False and not self._remove and not self._waiting:
                             self._sendMessage('Found stones blocking  ' + str(self._door['room_name']) + '. Please decide whether to "Remove together", "Remove alone", or "Continue" searching. \n \n \
@@ -535,6 +570,10 @@ class TrustAgent(BaselineAgent):
                         # Remove the obstacle together if the human decides so
                         if self.received_messages_content and self.received_messages_content[
                             -1] == 'Remove together' or self._remove:
+
+                            # human said they would show up, timer starts here.
+                            self.wait_on_human = True
+
                             if not self._remove:
                                 self._answered = True
                             # Tell the human to come over and be idle untill human arrives
@@ -554,9 +593,12 @@ class TrustAgent(BaselineAgent):
                             return None, {}
                 # If no obstacles are blocking the entrance, enter the area
                 if len(objects) == 0:
-                    if (self.remove_together):
+                    if self.remove_together:
                         self.remove_together = False
                         self.update_trust(Punishment.HELP_REMOVE, Punishment.HELP_REMOVE, self._folder)
+                        if self._idle_timer > Punishment.TIMEOUT:
+                            self.update_trust(0, Punishment.SLOW_WALK, self._folder)
+                        self._idle_timer = 0
                     self._answered = False
                     self._remove = False
                     self._waiting = False
