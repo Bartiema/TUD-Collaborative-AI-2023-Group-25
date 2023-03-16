@@ -587,6 +587,11 @@ class TrustAgent(BaselineAgent):
                                     self._sendMessage('Found ' + vic + ' in ' + self._door[
                                         'room_name'] + ' because you told me ' + vic + ' was located here.',
                                                       'RescueBot')
+
+                                    # TRUST UPDATE
+                                    # Human told the truth about the victim
+                                    self.update_trust(+0.1, +0.1, self._folder)
+
                                     # Add the area to the list with searched areas
                                     if self._door['room_name'] not in self._searchedRooms:
                                         self._searchedRooms.append(self._door['room_name'])
@@ -627,7 +632,7 @@ class TrustAgent(BaselineAgent):
                                                                                    'room_name']) + ' because I searched the whole area without finding ' + self._goalVic + '.',
                                       'RescueBot')
                     # TRUST UPDATE
-                    self.update_trust(0, -0.2, self._folder)
+                    self.update_trust(-0.1, -0.2, self._folder)
 
                     # Remove the victim location from memory
                     self._foundVictimLocs.pop(self._goalVic, None)
@@ -757,6 +762,11 @@ class TrustAgent(BaselineAgent):
                     if self._goalVic not in self._collectedVictims:
                         self._collectedVictims.append(self._goalVic)
                     self._carryingTogether = True
+
+                    # TRUST UPDATE
+                    # Robot and human work together on delivering a victim
+                    self.update_trust(+0.2, +0.2, self._folder)
+
                     # Determine the next victim to rescue or search
                     self._phase = Phase.FIND_NEXT_GOAL
                 # When rescuing mildly injured victims alone, pick the victim up and plan the path to the drop zone
@@ -791,6 +801,8 @@ class TrustAgent(BaselineAgent):
                 # Communicate that the agent delivered a mildly injured victim alone to the drop zone
                 if 'mild' in self._goalVic and self._rescue == 'alone':
                     self._sendMessage('Delivered ' + self._goalVic + ' at the drop zone.', 'RescueBot')
+
+
                 # Identify the next target victim to rescue
                 self._phase = Phase.FIND_NEXT_GOAL
                 self._rescue = None
