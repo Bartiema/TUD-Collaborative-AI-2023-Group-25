@@ -43,7 +43,6 @@ class Punishment():
     FAST_CARRY = 0.2
     FAST_REPLY = 0.1
     SLOW_REPLY = -0.2
-    SLOW_WALK = -0.2
     # trigger below if distance close but human no wants help
     SLOW_SOLO_RESCUE_COMPETENCE = -0.1
     SLOW_SOLO_RESCUE_WILLINGNESS = 0.1
@@ -597,7 +596,7 @@ class TrustAgent(BaselineAgent):
                         self.remove_together = False
                         self.update_trust(Punishment.HELP_REMOVE, Punishment.HELP_REMOVE, self._folder)
                         if self._idle_timer > Punishment.TIMEOUT:
-                            self.update_trust(0, Punishment.SLOW_WALK, self._folder)
+                            self.update_trust(Punishment.NO_SHOW_COMPETENCE, Punishment.NO_SHOW_WILLINGNESS, self._folder)
                         self._idle_timer = 0
                     self._answered = False
                     self._remove = False
