@@ -94,6 +94,7 @@ class TrustAgent(BaselineAgent):
         self._moving = False
         self._trustBeliefs = None
         self.remove_together = False
+        self.carryingTogetherFlipFlop = False
         self._idle_timer = 0
 
         trustBeliefs = self._loadBelief(self._teamMembers, self._folder)
@@ -213,8 +214,13 @@ class TrustAgent(BaselineAgent):
             if 'is_human_agent' in info and self._humanName in info['name'] and len(info['is_carrying']) == 0:
                 self._carryingTogether = False
         # If carrying a victim together, let agent be idle (because joint actions are essentially carried out by the human)
-        if self._carryingTogether == True:
+        if self._carryingTogether:
+            # very naive check as it assumes we dropped them in the drop zone.
+            if not self.carryingTogetherFlipFlop:
+                self.carryingTogetherFlipFlop = True
+                self.update_trust(Punishment.FAST_CARRY, Punishment.FAST_CARRY, self._folder)
             return None, {}
+        self.carryingTogetherFlipFlop = False
 
         # Send the hidden score message for displaying and logging the score during the task, DO NOT REMOVE THIS
         self._sendMessage('Our score is ' + str(state['rescuebot']['score']) + '.', 'RescueBot')
