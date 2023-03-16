@@ -34,6 +34,30 @@ class Phase(enum.Enum):
     ENTER_ROOM = 19
 
 
+class Punishment():
+    TIMEOUT = 900
+
+    SUCCESFULL_RESCUE = 0.2
+    HELP_REMOVE = 0.1
+    FAST_CARRY = 0.2
+    FAST_REPLY = 0.1
+    SLOW_REPLY = -0.2
+    # trigger below if distance close but human no wants help
+    SLOW_SOLO_RESCUE_COMPETENCE = -0.1
+    SLOW_SOLO_RESCUE_WILLINGNESS = 0.1
+    OBS_LIE = -0.1
+    OBS_TRUTH = 0.1
+    SOLO_RESCUE_NO_COM_COMPETENCE = 0.1
+    SOLO_RESCUE_NO_COM_WILLINGNESS = -0.2
+    LIE_ABOUT_RESCUE = -0.2
+    # what is too many times?
+    # what if human judgement is correct and help is faster.
+    ASKS_TOO_MANY_TIMES = -0.1
+
+    NO_SHOW_COMPETENCE = -0.1
+    NO_SHOW_WILLINGNESS = -0.2
+
+
 class TrustAgent(BaselineAgent):
     def __init__(self, slowdown, condition, name, folder):
         super().__init__(slowdown, condition, name, folder)
@@ -69,6 +93,8 @@ class TrustAgent(BaselineAgent):
         self._receivedMessages = []
         self._moving = False
         self._trustBeliefs = None
+        self.remove_together = False
+        self._idle_timer = 0
 
         trustBeliefs = self._loadBelief(self._teamMembers, self._folder)
         self._trustBeliefs = trustBeliefs
@@ -124,7 +150,6 @@ class TrustAgent(BaselineAgent):
             # Restrict the competence belief to a range of -1 to 1
             trustBeliefs[self._humanName]['willingness'] = np.clip(trustBeliefs[self._humanName]['willingness'], -1,
                                                                    1)
-
 
         self._trustBeliefs = trustBeliefs
         # # Save current trust belief values again
@@ -427,6 +452,8 @@ class TrustAgent(BaselineAgent):
                             if state[{'is_human_agent': True}]:
                                 self._sendMessage('Lets remove rock blocking ' + str(self._door['room_name']) + '!',
                                                   'RescueBot')
+                                self.remove_together = True
+
                                 return None, {}
                         # Remain idle untill the human communicates what to do with the identified obstacle
                         else:
@@ -514,12 +541,16 @@ class TrustAgent(BaselineAgent):
                             if state[{'is_human_agent': True}]:
                                 self._sendMessage('Lets remove stones blocking ' + str(self._door['room_name']) + '!',
                                                   'RescueBot')
+                                self.remove_together = True
                                 return None, {}
                         # Remain idle until the human communicates what to do with the identified obstacle
                         else:
                             return None, {}
                 # If no obstacles are blocking the entrance, enter the area
                 if len(objects) == 0:
+                    if (self.remove_together):
+                        self.remove_together = False
+                        self.update_trust(Punishment.HELP_REMOVE, Punishment.HELP_REMOVE, self._folder)
                     self._answered = False
                     self._remove = False
                     self._waiting = False
