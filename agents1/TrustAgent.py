@@ -330,6 +330,7 @@ class TrustAgent(BaselineAgent):
                                    and 'Door' in room['class_inheritance']
                                    and room['room_name'] not in self._searchedRooms
                                    and room['room_name'] not in self._tosearch]
+                unsearchedRooms.append(self._claimedSearchedRooms)
                 # If all areas have been searched but the task is not finished, start searching areas again
                 if self._remainingZones and len(unsearchedRooms) == 0:
                     self._tosearch = []
