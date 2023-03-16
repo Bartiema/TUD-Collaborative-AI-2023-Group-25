@@ -221,6 +221,14 @@ class TrustAgent(BaselineAgent):
             # very naive check as it assumes we dropped them in the drop zone.
             if not self.carryingTogetherFlipFlop:
                 self.carryingTogetherFlipFlop = True
+
+                # This means that before they started carrying the human was too late
+                if self._idle_timer > Punishment.TIMEOUT:
+                    print('updating trust for NO_SHOW')
+                    self.update_trust(Punishment.NO_SHOW_COMPETENCE, Punishment.NO_SHOW_WILLINGNESS, self._folder)
+                    self._idle_timer = 0
+
+                print('updating trust for FAST_CARRY')
                 self.update_trust(Punishment.FAST_CARRY, Punishment.FAST_CARRY, self._folder)
             return None, {}
         self.carryingTogetherFlipFlop = False
@@ -667,6 +675,10 @@ class TrustAgent(BaselineAgent):
                 # Search the area
                 self._state_tracker.update(state)
                 action = self._navigator.get_move_action(self._state_tracker)
+                if self._waiting:
+                    self._idle_timer += 1
+                else:
+                    self._idle_timer = 0
                 if action != None:
                     # Identify victims present in the area
                     for info in state.values():
@@ -793,6 +805,16 @@ class TrustAgent(BaselineAgent):
                     self._todo.append(self._recentVic)
                     self._recentVic = None
                     self._phase = Phase.FIND_NEXT_GOAL
+                # no longer waiting so a decision was made.
+                if not self._waiting:
+                    if self._idle_timer > Punishment.REPLY_TIMEOUT:
+                        print('updating trust for SLOW_REPLY')
+                        self.update_trust(Punishment.SLOW_REPLY, Punishment.SLOW_REPLY, self._folder)
+                    elif self._idle_timer < Punishment.FAST_REPLY_TIMEOUT:
+                        print('updating trust for FAST_REPLY')
+                        self.update_trust(Punishment.FAST_REPLY, Punishment.FAST_REPLY, self._folder)
+                    self._idle_timer = 0
+
                 # Remain idle untill the human communicates to the agent what to do with the found victim
                 if self.received_messages_content and self._waiting and self.received_messages_content[
                     -1] != 'Rescue' and self.received_messages_content[-1] != 'Continue':
@@ -831,6 +853,12 @@ class TrustAgent(BaselineAgent):
                              and info['room_name'] == self._foundVictimLocs[self._goalVic]['room']]
                 self._roomtiles = roomTiles
                 objects = []
+
+                if self._waiting:
+                    self._idle_timer += 1
+                else:
+                    self._idle_timer = 0
+
                 # When the victim has to be carried by human and agent together, check whether human has arrived at the victim's location
                 for info in state.values():
                     # When the victim has to be carried by human and agent together, check whether human has arrived at the victim's location
