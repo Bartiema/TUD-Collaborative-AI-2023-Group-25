@@ -624,6 +624,7 @@ class TrustAgent(BaselineAgent):
                                     self._sendMessage('Found ' + vic + ' in ' + self._door[
                                         'room_name'] + ' because you told me ' + vic + ' was located here.',
                                                       'RescueBot')
+                                    self.update_trust(Punishment.OBS_TRUTH, Punishment.OBS_TRUTH, self._folder)
                                     # Add the area to the list with searched areas
                                     if self._door['room_name'] not in self._searchedRooms:
                                         self._searchedRooms.append(self._door['room_name'])
