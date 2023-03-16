@@ -1038,33 +1038,36 @@ class TrustAgent(BaselineAgent):
 
                 # If a received message involves team members asking for help with removing obstacles, add their location to memory and come over
                 if msg.startswith('Remove:'):
-                    # Come over immediately when the agent is not carrying a victim
-                    if not self._carrying:
-                        # Identify at which location the human needs help
-                        area = 'area ' + msg.split()[-1]
-                        self._door = state.get_room_doors(area)[0]
-                        self._doormat = state.get_room(area)[-1]['doormat']
-                        if area in self._searchedRooms:
-                            self._searchedRooms.remove(area)
-                        # Clear received messages (bug fix)
-                        self.received_messages = []
-                        self.received_messages_content = []
-                        self._moving = True
-                        self._remove = True
-                        if self._waiting and self._recentVic:
-                            self._todo.append(self._recentVic)
-                        self._waiting = False
-                        # Let the human know that the agent is coming over to help
-                        self._sendMessage(
-                            'Moving to ' + str(self._door['room_name']) + ' to help you remove an obstacle.',
-                            'RescueBot')
-                        # Plan the path to the relevant area
-                        self._phase = Phase.PLAN_PATH_TO_ROOM
-                    # Come over to help after dropping a victim that is currently being carried by the agent
+                    if self._trustBelief[willingness] > 0.25:
+                        # Come over immediately when the agent is not carrying a victim
+                        if not self._carrying:
+                            # Identify at which location the human needs help
+                            area = 'area ' + msg.split()[-1]
+                            self._door = state.get_room_doors(area)[0]
+                            self._doormat = state.get_room(area)[-1]['doormat']
+                            if area in self._searchedRooms:
+                                self._searchedRooms.remove(area)
+                            # Clear received messages (bug fix)
+                            self.received_messages = []
+                            self.received_messages_content = []
+                            self._moving = True
+                            self._remove = True
+                            if self._waiting and self._recentVic:
+                                self._todo.append(self._recentVic)
+                            self._waiting = False
+                            # Let the human know that the agent is coming over to help
+                            self._sendMessage(
+                                'Moving to ' + str(self._door['room_name']) + ' to help you remove an obstacle.',
+                                'RescueBot')
+                            # Plan the path to the relevant area
+                            self._phase = Phase.PLAN_PATH_TO_ROOM
+                        # Come over to help after dropping a victim that is currently being carried by the agent
+                        else:
+                            area = 'area ' + msg.split()[-1]
+                            self._sendMessage('Will come to ' + area + ' after dropping ' + self._goalVic + '.',
+                                            'RescueBot')
                     else:
-                        area = 'area ' + msg.split()[-1]
-                        self._sendMessage('Will come to ' + area + ' after dropping ' + self._goalVic + '.',
-                                          'RescueBot')
+                        self._sendMessage("Not enough trust will not come to help")
             # Store the current location of the human in memory
             if mssgs and mssgs[-1].split()[-1] in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
                                                    '14']:
