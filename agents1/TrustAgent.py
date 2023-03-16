@@ -37,6 +37,7 @@ class Phase(enum.Enum):
 class Punishment():
     TIMEOUT = 900
     REPLY_TIMEOUT = 100
+    FAST_REPLY_TIMEOUT = 20
 
     SUCCESFULL_RESCUE = 0.2
     HELP_REMOVE = 0.1
@@ -437,7 +438,12 @@ class TrustAgent(BaselineAgent):
 
                         if self._waiting and self.wait_on_human:
                             if self._idle_timer > Punishment.REPLY_TIMEOUT:
+                                print('updating trust for SLOW REPLY')
                                 self.update_trust(0, Punishment.SLOW_REPLY, self._folder)
+                            elif self._idle_timer < Punishment.FAST_REPLY_TIMEOUT:
+                                print('updating trust for FAST REPLY')
+                                self.update_trust(Punishment.FAST_REPLY, Punishment.FAST_REPLY, self._folder)
+                            self.wait_on_human = False
                             self._idle_timer = 0
 
                         # Communicate which obstacle is blocking the entrance
@@ -460,12 +466,14 @@ class TrustAgent(BaselineAgent):
                         # Wait for the human to help removing the obstacle and remove the obstacle together
                         if self.received_messages_content and self.received_messages_content[
                             -1] == 'Remove' or self._remove:
+                            self.wait_on_human = True
                             if not self._remove:
                                 self._answered = True
                             # Tell the human to come over and be idle untill human arrives
                             if not state[{'is_human_agent': True}]:
                                 self._sendMessage('Please come to ' + str(self._door['room_name']) + ' to remove rock.',
                                                   'RescueBot')
+                                self.remove_together = True
                                 return None, {}
                             # Tell the human to remove the obstacle when he/she arrives
                             if state[{'is_human_agent': True}]:
@@ -489,7 +497,12 @@ class TrustAgent(BaselineAgent):
 
                         if self._waiting and self.wait_on_human:
                             if self._idle_timer > Punishment.REPLY_TIMEOUT:
+                                print('updating trust for SLOW REPLY')
                                 self.update_trust(0, Punishment.SLOW_REPLY, self._folder)
+                            elif self._idle_timer < Punishment.FAST_REPLY_TIMEOUT:
+                                print('updating trust for FAST REPLY')
+                                self.update_trust(Punishment.FAST_REPLY, Punishment.FAST_REPLY, self._folder)
+                            self.wait_on_human = False
                             self._idle_timer = 0
 
                         # Communicate which obstacle is blocking the entrance
@@ -536,7 +549,12 @@ class TrustAgent(BaselineAgent):
 
                         if self._waiting and self.wait_on_human:
                             if self._idle_timer > Punishment.REPLY_TIMEOUT:
+                                print('updating trust for SLOW REPLY')
                                 self.update_trust(0, Punishment.SLOW_REPLY, self._folder)
+                            elif self._idle_timer < Punishment.FAST_REPLY_TIMEOUT:
+                                print('updating trust for FAST REPLY')
+                                self.update_trust(Punishment.FAST_REPLY, Punishment.FAST_REPLY, self._folder)
+                            self.wait_on_human = False
                             self._idle_timer = 0
 
                         # Communicate which obstacle is blocking the entrance
@@ -580,6 +598,7 @@ class TrustAgent(BaselineAgent):
                                 self._sendMessage(
                                     'Please come to ' + str(self._door['room_name']) + ' to remove stones together.',
                                     'RescueBot')
+                                self.remove_together = True
                                 return None, {}
                             # Tell the human to remove the obstacle when he/she arrives
                             if state[{'is_human_agent': True}]:
@@ -594,8 +613,10 @@ class TrustAgent(BaselineAgent):
                 if len(objects) == 0:
                     if self.remove_together:
                         self.remove_together = False
+                        print('updating trust for HELP_REMOVE')
                         self.update_trust(Punishment.HELP_REMOVE, Punishment.HELP_REMOVE, self._folder)
                         if self._idle_timer > Punishment.TIMEOUT:
+                            print('updating trust for NO SHOW')
                             self.update_trust(Punishment.NO_SHOW_COMPETENCE, Punishment.NO_SHOW_WILLINGNESS, self._folder)
                         self._idle_timer = 0
                     self._answered = False
