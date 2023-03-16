@@ -325,6 +325,7 @@ class TrustAgent(BaselineAgent):
                     self.received_messages = []
                     self.received_messages_content = []
                     self._sendMessage('Going to re-search all areas.', 'RescueBot')
+                    self.update_trust(Punishment.LIE_ABOUT_RESCUE, Punishment.LIE_ABOUT_RESCUE, self._folder)
                     self._phase = Phase.FIND_NEXT_GOAL
                 # If there are still areas to search, define which one to search next
                 else:
