@@ -939,6 +939,8 @@ class TrustAgent(BaselineAgent):
         '''
         process incoming messages received from the team members
         '''
+        willingness = 'willingness'
+        competence = 'competence'
 
         receivedMessages = {}
         # Create a dictionary with a list of received messages from each team member
@@ -955,9 +957,9 @@ class TrustAgent(BaselineAgent):
                 if msg.startswith("Search:"):
                     area = 'area ' + msg.split()[-1]
                     if area not in self._searchedRooms:
-                        if self._trustBelief[willingness] > -0.5:
+                        if self._trustBeliefs[willingness] > -0.5:
                             self._searchedRooms.append(area)
-                        if self._trustBelief[willingness] < 0.5:
+                        if self._trustBeliefs[willingness] < 0.5:
                             self._claimedSearchedRooms.append(area)
 
                 # If a received message involves team members finding victims, add these victims and their locations to memory
@@ -970,28 +972,28 @@ class TrustAgent(BaselineAgent):
                     loc = 'area ' + msg.split()[-1]
                     # Add the area to the memory of searched areas
                     if loc not in self._searchedRooms:
-                        if self._trustBelief[willingness] > -0.5:
+                        if self._trustBeliefs[willingness] > -0.5:
                             self._searchedRooms.append(loc)
-                        if self._trustBelief[willingness] < -0.5:
+                        if self._trustBeliefs[willingness] < -0.5:
                             self._claimedSearchedRooms.append(loc)
                     # Add the victim and its location to memory
                     if foundVic not in self._foundVictims:
-                        if self._trustBelief[willingness] > -0.5:
+                        if self._trustBeliefs[willingness] > -0.5:
                             self._foundVictims.append(foundVic)
                             self._foundVictimLocs[foundVic] = {'room': loc}
-                        if self._trustBelief[willingness] < 0.5:
+                        if self._trustBeliefs[willingness] < 0.5:
                             self._claimedFoundVictims.append(foundVic)
                             self._claimedFoundVictimLocs[foundVic] = {'room' : loc}
 
                     if foundVic in self._foundVictims and self._foundVictimLocs[foundVic]['room'] != loc:
-                        if self._trustBelief[willingness] > 0.5:
+                        if self._trustBeliefs[willingness] > 0.5:
                             self._foundVictimLocs[foundVic] = {'room': loc}
-                        if self._trustBelief[willingness] > -0.5:
+                        if self._trustBeliefs[willingness] > -0.5:
                             self._claimedFoundVictimLocs[collectVic] = {'room': loc}
                     
                     # Decide to help the human carry a found victim when the human's condition is 'weak'
                     if condition == 'weak':
-                        if self._trustBelief[willingness] > 0.25:
+                        if self._trustBeliefs[willingness] > 0.25:
                             self._rescue = 'together'
                         else:
                             self._todo.append(foundVic)
@@ -1008,23 +1010,23 @@ class TrustAgent(BaselineAgent):
                     loc = 'area ' + msg.split()[-1]
                     # Add the area to the memory of searched areas
                     if loc not in self._searchedRooms:
-                        if self._trustBelief[willingness] > -0.5:
+                        if self._trustBeliefs[willingness] > -0.5:
                             self._searchedRooms.append(loc)
-                        if self._trustBelief[willingness] < -0.5:
+                        if self._trustBeliefs[willingness] < -0.5:
                             self._claimedSearchedRooms.append(loc)
                     # Add the victim and its location to memory
                     if collectVic not in self._foundVictims:
-                        if self._trustBelief[willingness] > -0.5:
+                        if self._trustBeliefs[willingness] > -0.5:
                             self._foundVictims.append(collectVic)
                             self._foundVictimLocs[collectVic] = {'room': loc}
-                        if self._trustBelief[willingness] < 0.5:
+                        if self._trustBeliefs[willingness] < 0.5:
                             self._claimedFoundVictims.append(collectVic)
                             self._claimedFoundVictimLocs[collectVic] = {'room' : loc}
 
                     if collectVic in self._foundVictims and self._foundVictimLocs[collectVic]['room'] != loc:
-                        if self._trustBelief[willingness] > 0.5:
+                        if self._trustBeliefs[willingness] > 0.5:
                             self._foundVictimLocs[collectVic] = {'room': loc}
-                        if self._trustBelief[willingness] > -0.5:
+                        if self._trustBeliefs[willingness] > -0.5:
                             self._claimedFoundVictimLocs[collectVic] = {'room': loc}
                     
                     # Add the victim to the memory of rescued victims when the human's condition is not weak
@@ -1032,14 +1034,14 @@ class TrustAgent(BaselineAgent):
                         self._collectedVictims.append(collectVic)
                     # Decide to help the human carry the victim together when the human's condition is weak
                     if condition == 'weak':
-                        if self._trustBelief[willingness] > 0.25:
+                        if self._trustBeliefs[willingness] > 0.25:
                             self._rescue = 'together'
                         else:
                             self._todo.append(foundVic)
 
                 # If a received message involves team members asking for help with removing obstacles, add their location to memory and come over
                 if msg.startswith('Remove:'):
-                    if self._trustBelief[willingness] > 0.25:
+                    if self._trustBeliefs[willingness] > 0.25:
                         # Come over immediately when the agent is not carrying a victim
                         if not self._carrying:
                             # Identify at which location the human needs help
