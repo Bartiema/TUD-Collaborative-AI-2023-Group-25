@@ -39,6 +39,9 @@ class Punishment():
     REPLY_TIMEOUT = 100
     FAST_REPLY_TIMEOUT = 20
 
+    MEDIUM_WILLINGNESS_TIMEOUT = 700
+    LOW_WILLINGNESS_TIMEOUT = 400
+
     SUCCESFULL_RESCUE = 0.2
     HELP_REMOVE = 0.1
     FAST_CARRY = 0.2
@@ -461,6 +464,7 @@ class TrustAgent(BaselineAgent):
                             self.wait_on_human = False
                             self._idle_timer = 0
 
+                        
                         # Communicate which obstacle is blocking the entrance
                         if self._answered == False and not self._remove and not self._waiting:
                             self._sendMessage('Found rock blocking ' + str(self._door['room_name']) + '. Please decide whether to "Remove" or "Continue" searching. \n \n \
@@ -498,8 +502,24 @@ class TrustAgent(BaselineAgent):
 
                                 return None, {}
                         # Remain idle untill the human communicates what to do with the identified obstacle
-                        else:
-                            return None, {}
+                        else: 
+                            #LOW WILLINGNES STOP WAITING ON RESPONSE OR IF THEY SAY THEY ARE COMMING
+                            if self._trustBeliefs[willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            elif self._trustBeliefs[willingnes] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            else:
+                                return None, {}
+                                
+                                
 
                     if 'class_inheritance' in info and 'ObstacleObject' in info['class_inheritance'] and 'tree' in info[
                         'obj_id']:
@@ -552,7 +572,21 @@ class TrustAgent(BaselineAgent):
                             return RemoveObject.__name__, {'object_id': info['obj_id']}
                         # Remain idle untill the human communicates what to do with the identified obstacle
                         else:
-                            return None, {}
+                            #LOW WILLINGNES STOP WAITING ON RESPONSE OR IF THEY SAY THEY ARE COMMING
+                            if self._trustBeliefs[willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            elif self._trustBeliefs[willingnes] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            else:
+                                return None, {}
 
                     if 'class_inheritance' in info and 'ObstacleObject' in info['class_inheritance'] and 'stone' in \
                             info['obj_id']:
@@ -623,7 +657,21 @@ class TrustAgent(BaselineAgent):
                                 return None, {}
                         # Remain idle until the human communicates what to do with the identified obstacle
                         else:
-                            return None, {}
+                            #LOW WILLINGNES STOP WAITING ON RESPONSE OR IF THEY SAY THEY ARE COMMING
+                            if self._trustBeliefs[willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            elif self._trustBeliefs[willingnes] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            else:
+                                return None, {}
                 # If no obstacles are blocking the entrance, enter the area
                 if len(objects) == 0:
                     if self.remove_together:
