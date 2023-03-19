@@ -939,7 +939,7 @@ class TrustAgent(BaselineAgent):
                     self._recentVic = None
                     self._phase = Phase.FIND_NEXT_GOAL
                 # no longer waiting so a decision was made.
-                if not self._waiting:
+                if not self._waiting and self._idle_timer != 0:
                     if self._idle_timer > Punishment.REPLY_TIMEOUT:
                         print('updating trust for SLOW_REPLY')
                         self.update_trust(Punishment.SLOW_REPLY, Punishment.SLOW_REPLY, self._folder)
@@ -1119,7 +1119,7 @@ class TrustAgent(BaselineAgent):
                         if self._trustBeliefs[self._humanName][willingness] > 0.5:
                             self._foundVictimLocs[foundVic] = {'room': loc}
                         if self._trustBeliefs[self._humanName][willingness] > -0.5:
-                            self._claimedFoundVictimLocs[collectVic] = {'room': loc}
+                            self._claimedFoundVictimLocs[foundVic] = {'room': loc}
                     
                     # Decide to help the human carry a found victim when the human's condition is 'weak'
                     if self.isWeak():
