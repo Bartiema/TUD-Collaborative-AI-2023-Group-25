@@ -335,7 +335,7 @@ class TrustAgent(BaselineAgent):
                                    and room['room_name'] not in self._tosearch]
                 unsearchedRooms.append(self._claimedSearchedRooms)
                 # If all areas have been searched but the task is not finished, start searching areas again
-                if self._remainingZones and len(unsearchedRooms) == 0:
+                if self._remainingZones and len(unsearchedRooms) == 0 and len(self._tosearch == 0):
                     self._tosearch = []
                     self._searchedRooms = []
                     self._sendMessages = []
@@ -344,6 +344,30 @@ class TrustAgent(BaselineAgent):
                     self._sendMessage('Going to re-search all areas.', 'RescueBot')
                     self.update_trust(Punishment.LIE_ABOUT_RESCUE, Punishment.LIE_ABOUT_RESCUE, self._folder)
                     self._phase = Phase.FIND_NEXT_GOAL
+                #SEARCH TODOS before removing them.
+                elif self._remainingZones and len(unsearchedRooms) == 0:
+                    # Identify the closest door when the agent did not search any areas yet
+                    if self._currentDoor == None:
+                        # Find all area entrance locations
+                        self._door = state.get_room_doors(self._getClosestRoom(state, self._tosearch, agent_location))[
+                            0]
+                        self._doormat = \
+                            state.get_room(self._getClosestRoom(state, self._tosearch, agent_location))[-1]['doormat']
+                        # Workaround for one area because of some bug
+                        if self._door['room_name'] == 'area 1':
+                            self._doormat = (3, 5)
+                        # Plan path to area
+                        self._phase = Phase.PLAN_PATH_TO_ROOM
+                    # Identify the closest door when the agent just searched another area
+                    if self._currentDoor != None:
+                        self._door = \
+                            state.get_room_doors(self._getClosestRoom(state, self._tosearch, self._currentDoor))[0]
+                        self._doormat = \
+                            state.get_room(self._getClosestRoom(state, self._tosearch, self._currentDoor))[-1][
+                                'doormat']
+                        if self._door['room_name'] == 'area 1':
+                            self._doormat = (3, 5)
+                        self._phase = Phase.PLAN_PATH_TO_ROOM
                 # If there are still areas to search, define which one to search next
                 else:
                     # Identify the closest door when the agent did not search any areas yet
@@ -449,6 +473,20 @@ class TrustAgent(BaselineAgent):
                         'obj_id']:
                         objects.append(info)
 
+                        if self._door['room_name'] not in self._tosearch:
+                            if self._trustBeliefs[competence] < -0.5:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            elif self_trustBeliefs[competence] < 0.5 and self.distanceHuman == 'far':
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+
                         if self._waiting:
                             self._idle_timer += 1
                         else:
@@ -525,6 +563,21 @@ class TrustAgent(BaselineAgent):
                         'obj_id']:
                         objects.append(info)
 
+                        if self._door['room_name'] not in self._tosearch:
+                            if self._trustBeliefs[competence] < -0.5:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            elif self_trustBeliefs[competence] < 0.5 and self.distanceHuman == 'far':
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+
+
                         if self._waiting:
                             self._idle_timer += 1
                         else:
@@ -591,6 +644,21 @@ class TrustAgent(BaselineAgent):
                     if 'class_inheritance' in info and 'ObstacleObject' in info['class_inheritance'] and 'stone' in \
                             info['obj_id']:
                         objects.append(info)
+
+                        if self._door['room_name'] not in self._tosearch:
+                            if self._trustBeliefs[competence] < -0.5:
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+                            elif self_trustBeliefs[competence] < 0.5 and self.distanceHuman == 'far':
+                                self._answered = True
+                                self._waiting = False
+                                # Add area to the to do list
+                                self._tosearch.append(self._door['room_name'])
+                                self._phase = Phase.FIND_NEXT_GOAL
+
                         if self._waiting:
                             self._idle_timer += 1
                         else:
@@ -729,6 +797,13 @@ class TrustAgent(BaselineAgent):
                 # Search the area
                 self._state_tracker.update(state)
                 action = self._navigator.get_move_action(self._state_tracker)
+
+                if self._door['room_name'] in self._claimedSearchedRooms:
+                    self._claimedSearchedRooms.remove(self._door['room_name'])
+                
+                if self._door['room_name'] in self._tosearch:
+                    self._tosearch.remove(self._door['room_name'])
+
                 if self._waiting:
                     self._idle_timer += 1
                 else:
