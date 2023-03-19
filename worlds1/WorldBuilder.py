@@ -1,20 +1,18 @@
 import os
-import sys
 import numpy as np
-import itertools
-from collections import OrderedDict
-from itertools import product
 from matrx import WorldBuilder
-from matrx.actions import MoveNorth, OpenDoorAction, CloseDoorAction, GrabObject
+from matrx.actions import MoveNorth
 from matrx.actions.move_actions import MoveEast, MoveSouth, MoveWest
-from matrx.agents import AgentBrain, HumanAgentBrain, SenseCapability
-from matrx.grid_world import GridWorld, AgentBody
-from actions1.CustomActions import RemoveObjectTogether, DropObject, Idle, CarryObject, Drop, CarryObjectTogether, DropObjectTogether
+from matrx.agents import SenseCapability
+from matrx.grid_world import AgentBody
+from actions1.CustomActions import CarryObject, Drop, CarryObjectTogether, DropObjectTogether
 from matrx.actions.object_actions import RemoveObject
 from matrx.objects import EnvObject
-from matrx.world_builder import RandomProperty
 from matrx.goals import WorldGoal
-from agents1.OfficialAgent import BaselineAgent
+
+from agents1.TestTrustAgents.AlwaystTrustAgent import AlwaysTrustAgent
+from agents1.TestTrustAgents.NeverTrustAgent import NeverTrustAgent
+from agents1.TestTrustAgents.RandomTrustAgent import RandomTrustAgent
 from agents1.TrustAgent import TrustAgent
 from agents1.TutorialAgent import TutorialAgent
 from actions1.CustomActions import RemoveObjectTogether
