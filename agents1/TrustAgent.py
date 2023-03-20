@@ -1097,6 +1097,8 @@ class TrustAgent(BaselineAgent):
                             self._searchedRooms.append(area)
                         if self.get_trust(self._folder)[self._humanName][willingness] < 0.5:
                             self._claimedSearchedRooms.append(area)
+                    self.received_messages = []
+                    self.received_messages_content = []
 
                 # If a received message involves team members finding victims, add these victims and their locations to memory
                 if msg.startswith("Found:"):
@@ -1136,6 +1138,8 @@ class TrustAgent(BaselineAgent):
                     # Add the found victim to the to do list when the human's condition is not 'weak'
                     if 'mild' in foundVic and not self.isWeak():
                         self._todo.append(foundVic)
+                    self.received_messages = []
+                    self.received_messages_content = []
                 # If a received message involves team members rescuing victims, add these victims and their locations to memory
                 if msg.startswith('Collect:'):
                     # Identify which victim and area it concerns
@@ -1174,7 +1178,8 @@ class TrustAgent(BaselineAgent):
                             self._rescue = 'together'
                         else:
                             self._todo.append(foundVic)
-
+                    self.received_messages = []
+                    self.received_messages_content = []
                 # If a received message involves team members asking for help with removing obstacles, add their location to memory and come over
                 if msg.startswith('Remove:'):
                     if self.get_trust(self._folder)[self._humanName][willingness] > 0.25:
