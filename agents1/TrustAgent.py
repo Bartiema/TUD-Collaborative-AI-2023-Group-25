@@ -345,7 +345,7 @@ class TrustAgent(BaselineAgent):
                 if self._claimedSearchedRooms:
                     unsearchedRooms.extend(self._claimedSearchedRooms)
                 # If all areas have been searched but the task is not finished, start searching areas again
-                if self._remainingZones and len(unsearchedRooms) == 0 and len(self._tosearch == 0):
+                if self._remainingZones and len(unsearchedRooms) == 0 and len(self._tosearch) == 0:
                     self._tosearch = []
                     self._searchedRooms = []
                     self._sendMessages = []
