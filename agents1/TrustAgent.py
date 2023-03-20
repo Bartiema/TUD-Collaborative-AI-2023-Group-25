@@ -105,7 +105,7 @@ class TrustAgent(BaselineAgent):
 
         self._claimedSearchedRooms = []
         self._claimedFoundVictims = []
-        self._claimedFoundVictimLocs = []
+        self._claimedFoundVictimLocs = {}
 
 
         trustBeliefs = self._loadBelief(self._teamMembers, self._folder)
@@ -172,11 +172,11 @@ class TrustAgent(BaselineAgent):
                                  trustBeliefs[self._humanName]['willingness']])
             csv_file.close()
 
-        with open(folder + '/beliefs/allTrustBeliefs.csv', mode='w') as csv_file:
-            csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([self._humanName, trustBeliefs[self._humanName]['competence'],
-                                 trustBeliefs[self._humanName]['willingness']])
-            csv_file.close()
+        # with open(folder + '/beliefs/allTrustBeliefs.csv', mode='w') as csv_file:
+        #     csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        #     csv_writer.writerow([self._humanName, trustBeliefs[self._humanName]['competence'],
+        #                          trustBeliefs[self._humanName]['willingness']])
+        #     csv_file.close()
         print("UPDATED TRUST BELIEFS",  trustBeliefs)
 
     def decide_on_actions(self, state):
