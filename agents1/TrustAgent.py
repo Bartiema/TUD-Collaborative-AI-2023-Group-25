@@ -343,7 +343,7 @@ class TrustAgent(BaselineAgent):
                                    and room['room_name'] not in self._searchedRooms
                                    and room['room_name'] not in self._tosearch]
                 if self._claimedSearchedRooms:
-                    unsearchedRooms.append(self._claimedSearchedRooms)
+                    unsearchedRooms.extend(self._claimedSearchedRooms)
                 # If all areas have been searched but the task is not finished, start searching areas again
                 if self._remainingZones and len(unsearchedRooms) == 0 and len(self._tosearch == 0):
                     self._tosearch = []
@@ -484,13 +484,13 @@ class TrustAgent(BaselineAgent):
                         objects.append(info)
 
                         if self._door['room_name'] not in self._tosearch:
-                            if self._trustBeliefs[self._humanName][competence] < -0.5:
+                            if self.get_trust(self._folder)[self._humanName][competence] < -0.5:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
                                 self._tosearch.append(self._door['room_name'])
                                 self._phase = Phase.FIND_NEXT_GOAL
-                            elif self._trustBeliefs[self._humanName][competence] < 0.5 and self.distanceHuman == 'far':
+                            elif self.get_trust(self._folder)[self._humanName][competence] < 0.5 and self._distanceHuman == 'far':
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
@@ -552,13 +552,13 @@ class TrustAgent(BaselineAgent):
                         # Remain idle untill the human communicates what to do with the identified obstacle
                         else: 
                             #LOW WILLINGNES STOP WAITING ON RESPONSE OR IF THEY SAY THEY ARE COMMING
-                            if self._trustBeliefs[self._humanName][willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
+                            if self.get_trust(self._folder)[self._humanName][willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
                                 self._tosearch.append(self._door['room_name'])
                                 self._phase = Phase.FIND_NEXT_GOAL
-                            elif self._trustBeliefs[self._humanName][willingness] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
+                            elif self.get_trust(self._folder)[self._humanName][willingness] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
@@ -574,13 +574,13 @@ class TrustAgent(BaselineAgent):
                         objects.append(info)
 
                         if self._door['room_name'] not in self._tosearch:
-                            if self._trustBeliefs[self._humanName][competence] < -0.5:
+                            if self.get_trust(self._folder)[self._humanName][competence] < -0.5:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
                                 self._tosearch.append(self._door['room_name'])
                                 self._phase = Phase.FIND_NEXT_GOAL
-                            elif self._trustBeliefs[self._humanName][competence] < 0.5 and self.distanceHuman == 'far':
+                            elif self.get_trust(self._folder)[self._humanName][competence] < 0.5 and self._distanceHuman == 'far':
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
@@ -636,13 +636,13 @@ class TrustAgent(BaselineAgent):
                         # Remain idle untill the human communicates what to do with the identified obstacle
                         else:
                             #LOW WILLINGNES STOP WAITING ON RESPONSE OR IF THEY SAY THEY ARE COMMING
-                            if self._trustBeliefs[self._humanName][willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
+                            if self.get_trust(self._folder)[self._humanName][willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
                                 self._tosearch.append(self._door['room_name'])
                                 self._phase = Phase.FIND_NEXT_GOAL
-                            elif self._trustBeliefs[self._humanName][willingness] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
+                            elif self.get_trust(self._folder)[self._humanName][willingness] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
@@ -656,13 +656,13 @@ class TrustAgent(BaselineAgent):
                         objects.append(info)
 
                         if self._door['room_name'] not in self._tosearch:
-                            if self._trustBeliefs[self._humanName][competence] < -0.5:
+                            if self.get_trust(self._folder)[self._humanName][competence] < -0.5:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
                                 self._tosearch.append(self._door['room_name'])
                                 self._phase = Phase.FIND_NEXT_GOAL
-                            elif self._trustBeliefs[self._humanName][competence] < 0.5 and self.distanceHuman == 'far':
+                            elif self.get_trust(self._folder)[self._humanName][competence] < 0.5 and self._distanceHuman == 'far':
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
@@ -736,13 +736,13 @@ class TrustAgent(BaselineAgent):
                         # Remain idle until the human communicates what to do with the identified obstacle
                         else:
                             #LOW WILLINGNES STOP WAITING ON RESPONSE OR IF THEY SAY THEY ARE COMMING
-                            if self._trustBeliefs[self._humanName][willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
+                            if self.get_trust(self._folder)[self._humanName][willingness] < 0.5 and self._idle_timer > Punishment.MEDIUM_WILLINGNESS_TIMEOUT:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
                                 self._tosearch.append(self._door['room_name'])
                                 self._phase = Phase.FIND_NEXT_GOAL
-                            elif self._trustBeliefs[self._humanName][willingness] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
+                            elif self.get_trust(self._folder)[self._humanName][willingness] < -0.5 and self._idle_timer > Punishment.LOW_WILLINGNESS_TIMEOUT:
                                 self._answered = True
                                 self._waiting = False
                                 # Add area to the to do list
@@ -1093,9 +1093,9 @@ class TrustAgent(BaselineAgent):
                 if msg.startswith("Search:"):
                     area = 'area ' + msg.split()[-1]
                     if area not in self._searchedRooms:
-                        if self._trustBeliefs[self._humanName][willingness] > -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > -0.5:
                             self._searchedRooms.append(area)
-                        if self._trustBeliefs[self._humanName][willingness] < 0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] < 0.5:
                             self._claimedSearchedRooms.append(area)
 
                 # If a received message involves team members finding victims, add these victims and their locations to memory
@@ -1108,28 +1108,28 @@ class TrustAgent(BaselineAgent):
                     loc = 'area ' + msg.split()[-1]
                     # Add the area to the memory of searched areas
                     if loc not in self._searchedRooms:
-                        if self._trustBeliefs[self._humanName][willingness] > -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > -0.5:
                             self._searchedRooms.append(loc)
-                        if self._trustBeliefs[self._humanName][willingness] <= -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] <= -0.5:
                             self._claimedSearchedRooms.append(loc)
                     # Add the victim and its location to memory
                     if foundVic not in self._foundVictims:
-                        if self._trustBeliefs[self._humanName][willingness] > -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > -0.5:
                             self._foundVictims.append(foundVic)
                             self._foundVictimLocs[foundVic] = {'room': loc}
-                        if self._trustBeliefs[self._humanName][willingness] < 0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] < 0.5:
                             self._claimedFoundVictims.append(foundVic)
                             self._claimedFoundVictimLocs[foundVic] = {'room' : loc}
 
                     if foundVic in self._foundVictims and self._foundVictimLocs[foundVic]['room'] != loc:
-                        if self._trustBeliefs[self._humanName][willingness] > 0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > 0.5:
                             self._foundVictimLocs[foundVic] = {'room': loc}
-                        if self._trustBeliefs[self._humanName][willingness] > -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > -0.5:
                             self._claimedFoundVictimLocs[foundVic] = {'room': loc}
                     
                     # Decide to help the human carry a found victim when the human's condition is 'weak'
                     if self.isWeak():
-                        if self._trustBeliefs[self._humanName][willingness] > 0.25:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > 0.25:
                             self._rescue = 'together'
                         else:
                             self._todo.append(foundVic)
@@ -1146,23 +1146,23 @@ class TrustAgent(BaselineAgent):
                     loc = 'area ' + msg.split()[-1]
                     # Add the area to the memory of searched areas
                     if loc not in self._searchedRooms:
-                        if self._trustBeliefs[self._humanName][willingness] > -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > -0.5:
                             self._searchedRooms.append(loc)
-                        if self._trustBeliefs[self._humanName][willingness] <= -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] <= -0.5:
                             self._claimedSearchedRooms.append(loc)
                     # Add the victim and its location to memory
                     if collectVic not in self._foundVictims:
-                        if self._trustBeliefs[self._humanName][willingness] > -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > -0.5:
                             self._foundVictims.append(collectVic)
                             self._foundVictimLocs[collectVic] = {'room': loc}
-                        if self._trustBeliefs[self._humanName][willingness] < 0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] < 0.5:
                             self._claimedFoundVictims.append(collectVic)
                             self._claimedFoundVictimLocs[collectVic] = {'room' : loc}
 
                     if collectVic in self._foundVictims and self._foundVictimLocs[collectVic]['room'] != loc:
-                        if self._trustBeliefs[self._humanName][willingness] > 0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > 0.5:
                             self._foundVictimLocs[collectVic] = {'room': loc}
-                        if self._trustBeliefs[self._humanName][willingness] > -0.5:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > -0.5:
                             self._claimedFoundVictimLocs[collectVic] = {'room': loc}
                     
                     # Add the victim to the memory of rescued victims when the human's condition is not weak
@@ -1170,14 +1170,14 @@ class TrustAgent(BaselineAgent):
                         self._collectedVictims.append(collectVic)
                     # Decide to help the human carry the victim together when the human's condition is weak
                     if self.isWeak():
-                        if self._trustBeliefs[self._humanName][willingness] > 0.25:
+                        if self.get_trust(self._folder)[self._humanName][willingness] > 0.25:
                             self._rescue = 'together'
                         else:
                             self._todo.append(foundVic)
 
                 # If a received message involves team members asking for help with removing obstacles, add their location to memory and come over
                 if msg.startswith('Remove:'):
-                    if self._trustBeliefs[self._humanName][willingness] > 0.25:
+                    if self.get_trust(self._folder)[self._humanName][willingness] > 0.25:
                         # Come over immediately when the agent is not carrying a victim
                         if not self._carrying:
                             # Identify at which location the human needs help
@@ -1206,7 +1206,7 @@ class TrustAgent(BaselineAgent):
                             self._sendMessage('Will come to ' + area + ' after dropping ' + self._goalVic + '.',
                                             'RescueBot')
                     else:
-                        self._sendMessage("Not enough trust will not come to help")
+                        self._sendMessage("Not enough trust will not come to help", 'RescueBot')
             # Store the current location of the human in memory
             if mssgs and mssgs[-1].split()[-1] in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
                                                    '14']:
