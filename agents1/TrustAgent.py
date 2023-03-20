@@ -126,7 +126,7 @@ class TrustAgent(BaselineAgent):
     def get_trust(self, folder):
         trustBeliefs = {}
         trustfile_header = []
-        default = 0.5
+        default = 0.0
         # read current trust value
         with open(folder + '/beliefs/currentTrustBelief.csv') as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar="'")
@@ -168,6 +168,12 @@ class TrustAgent(BaselineAgent):
         with open(folder + '/beliefs/currentTrustBelief.csv', mode='w') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow(['name', 'competence', 'willingness'])
+            csv_writer.writerow([self._humanName, trustBeliefs[self._humanName]['competence'],
+                                 trustBeliefs[self._humanName]['willingness']])
+            csv_file.close()
+
+        with open(folder + '/beliefs/allTrustBeliefs.csv', mode='w') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([self._humanName, trustBeliefs[self._humanName]['competence'],
                                  trustBeliefs[self._humanName]['willingness']])
             csv_file.close()
