@@ -1206,6 +1206,9 @@ class TrustAgent(BaselineAgent):
                             self._sendMessage('Will come to ' + area + ' after dropping ' + self._goalVic + '.',
                                             'RescueBot')
                     else:
+                        # Clear received messages (bug fix)
+                        self.received_messages = []
+                        self.received_messages_content = []
                         self._sendMessage("Not enough trust will not come to help", 'RescueBot')
             # Store the current location of the human in memory
             if mssgs and mssgs[-1].split()[-1] in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13',
